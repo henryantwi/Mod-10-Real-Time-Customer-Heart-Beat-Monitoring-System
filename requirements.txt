@@ -1,0 +1,4 @@
+kafka-python==2.0.2
+psycopg2-binary==2.9.9
+faker==22.0.0
+streamlit==1.31.0
