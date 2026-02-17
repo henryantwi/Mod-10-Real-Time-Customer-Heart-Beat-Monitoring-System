@@ -1,0 +1,32 @@
+# ── Assignment brief (not part of deliverables) ───────────────
+task.md
+
+# ── Python ─────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+.venv/
+venv/
+env/
+
+# ── IDE / Editor ───────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ── OS Files ───────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Docker volumes (local data) ────────────────────────────────
+postgres_data/
+
+# ── Misc ───────────────────────────────────────────────────────
+*.log
+.env
