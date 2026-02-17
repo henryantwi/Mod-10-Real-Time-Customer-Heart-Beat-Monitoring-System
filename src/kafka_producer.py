@@ -1,0 +1,61 @@
+"""
+Kafka Producer — sends heartbeat readings to a Kafka topic.
+
+Continuously generates data and publishes JSON messages to the
+configured Kafka topic at a regular interval.
+"""
+
+import json
+import sys
+import time
+
+from kafka import KafkaProducer
+
+from config import KAFKA_BOOTSTRAP_SERVERS, KAFKA_TOPIC, SEND_INTERVAL_SECONDS, NUM_CUSTOMERS
+from data_generator import generate_batch, generate_customer_ids
+
+
+def create_producer() -> KafkaProducer:
+    """Create and return a KafkaProducer that serializes values as JSON."""
+    return KafkaProducer(
+        bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
+        value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+    )
+
+
+def run_producer():
+    """Main loop — generates heartbeat data and sends it to Kafka."""
+    producer = create_producer()
+    customer_ids = generate_customer_ids(NUM_CUSTOMERS)
+
+    print(f"[Producer] Connected to Kafka at {KAFKA_BOOTSTRAP_SERVERS}")
+    print(f"[Producer] Publishing to topic: {KAFKA_TOPIC}")
+    print(f"[Producer] Simulating {len(customer_ids)} customers\n")
+
+    message_count = 0
+
+    try:
+        while True:
+            batch = generate_batch(customer_ids)
+            for reading in batch:
+                producer.send(KAFKA_TOPIC, value=reading)
+                message_count += 1
+
+                flag = " ⚠ ANOMALY" if reading["is_anomaly"] else ""
+                print(
+                    f"  [Sent #{message_count}] "
+                    f"{reading['customer_id']}  HR={reading['heart_rate']:>3}"
+                    f"  @ {reading['timestamp']}{flag}"
+                )
+
+            producer.flush()
+            time.sleep(SEND_INTERVAL_SECONDS)
+
+    except KeyboardInterrupt:
+        print(f"\n[Producer] Stopped. Total messages sent: {message_count}")
+    finally:
+        producer.close()
+
+
+if __name__ == "__main__":
+    run_producer()
