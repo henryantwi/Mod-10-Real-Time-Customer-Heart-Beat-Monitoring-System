@@ -2,49 +2,49 @@
 Database helper — manages PostgreSQL connections and inserts.
 """
 
-import psycopg2
-from psycopg2.extras import execute_values
+import pg8000.dbapi
 
 from config import DB_CONFIG
 
 
 def get_connection():
-    """Return a new psycopg2 connection using settings from config."""
-    return psycopg2.connect(**DB_CONFIG)
+    """Return a new pg8000 connection using settings from config."""
+    return pg8000.dbapi.connect(**DB_CONFIG)
 
 
 def insert_reading(reading: dict) -> None:
     """Insert a single heartbeat reading into the database."""
     sql = """
         INSERT INTO heartbeat_readings (customer_id, heart_rate, recorded_at, is_anomaly)
-        VALUES (%(customer_id)s, %(heart_rate)s, %(timestamp)s, %(is_anomaly)s)
+        VALUES (%s, %s, %s, %s)
     """
-    conn = get_connection()
-    try:
-        with conn.cursor() as cur:
-            cur.execute(sql, reading)
+    params = (
+        reading["customer_id"],
+        reading["heart_rate"],
+        reading["timestamp"],
+        reading["is_anomaly"],
+    )
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(sql, params)
         conn.commit()
-    finally:
-        conn.close()
 
 
 def insert_readings_batch(readings: list[dict]) -> None:
-    """Insert multiple heartbeat readings in a single round-trip."""
+    """Insert multiple heartbeat readings."""
     sql = """
         INSERT INTO heartbeat_readings (customer_id, heart_rate, recorded_at, is_anomaly)
-        VALUES %s
+        VALUES (%s, %s, %s, %s)
     """
-    values = [
+    # pg8000 executemany creates many INSERT statements, but it works
+    params_list = [
         (r["customer_id"], r["heart_rate"], r["timestamp"], r["is_anomaly"])
         for r in readings
     ]
-    conn = get_connection()
-    try:
-        with conn.cursor() as cur:
-            execute_values(cur, sql, values)
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.executemany(sql, params_list)
         conn.commit()
-    finally:
-        conn.close()
 
 
 def query_latest_readings(limit: int = 20) -> list[tuple]:
@@ -55,13 +55,10 @@ def query_latest_readings(limit: int = 20) -> list[tuple]:
         ORDER BY recorded_at DESC
         LIMIT %s
     """
-    conn = get_connection()
-    try:
-        with conn.cursor() as cur:
-            cur.execute(sql, (limit,))
-            return cur.fetchall()
-    finally:
-        conn.close()
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(sql, (limit,))
+        return cursor.fetchall()
 
 
 def query_anomalies(limit: int = 20) -> list[tuple]:
@@ -73,13 +70,10 @@ def query_anomalies(limit: int = 20) -> list[tuple]:
         ORDER BY recorded_at DESC
         LIMIT %s
     """
-    conn = get_connection()
-    try:
-        with conn.cursor() as cur:
-            cur.execute(sql, (limit,))
-            return cur.fetchall()
-    finally:
-        conn.close()
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(sql, (limit,))
+        return cursor.fetchall()
 
 
 def get_customer_stats() -> list[tuple]:
@@ -96,23 +90,24 @@ def get_customer_stats() -> list[tuple]:
         GROUP BY customer_id
         ORDER BY customer_id
     """
-    conn = get_connection()
-    try:
-        with conn.cursor() as cur:
-            cur.execute(sql)
-            return cur.fetchall()
-    finally:
-        conn.close()
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(sql)
+        return cursor.fetchall()
 
 
 # ── Quick standalone test ──────────────────────────────────────
 if __name__ == "__main__":
     print("[DB] Testing connection...")
-    conn = get_connection()
-    print("[DB] Connected successfully!")
-    conn.close()
+    try:
+        conn = get_connection()
+        print("[DB] Connected successfully!")
+        conn.close()
 
-    rows = query_latest_readings(5)
-    print(f"[DB] Latest {len(rows)} readings:")
-    for row in rows:
-        print(f"  {row}")
+        print("[DB] Querying latest readings...")
+        rows = query_latest_readings(5)
+        print(f"[DB] Latest {len(rows)} readings:")
+        for row in rows:
+            print(f"  {row}")
+    except Exception as e:
+        print(f"[DB] Connection query failed: {e}")

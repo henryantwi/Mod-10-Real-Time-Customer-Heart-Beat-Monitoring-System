@@ -11,7 +11,7 @@ KAFKA_TOPIC = "heartbeat-readings"
 DB_CONFIG = {
     "host": "localhost",
     "port": 5432,
-    "dbname": "heartbeat_db",
+    "database": "heartbeat_db",
     "user": "heartbeat_user",
     "password": "heartbeat_pass",
 }
