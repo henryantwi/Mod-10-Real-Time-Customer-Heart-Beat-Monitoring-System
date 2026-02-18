@@ -6,10 +6,10 @@ A data engineering pipeline that simulates heart rate monitors, streams readings
 
 ```mermaid
 flowchart LR
-    Generator[Data Generator\n(Producer)] -->|JSON| Kafka[Kafka\nBroker]
-    Kafka -->|JSON| Consumer[Kafka Consumer\n(Validator)]
-    Consumer -->|SQL| DB[(PostgreSQL\nDatabase)]
-    Grafana[Grafana\nDashboard] -.->|Query| DB
+    Generator["Data Generator (Producer)"] -->|JSON| Kafka["Kafka Broker"]
+    Kafka -->|JSON| Consumer["Kafka Consumer (Validator)"]
+    Consumer -->|SQL| DB[("PostgreSQL Database")]
+    Grafana["Grafana Dashboard"] -.->|Query| DB
 ```
 
 ## Prerequisites
