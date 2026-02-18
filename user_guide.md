@@ -71,7 +71,7 @@ Generates synthetic heartbeat data for 5 simulated customers and sends it to Kaf
 [Producer] Simulating 5 customers
 
   [Sent #1] CUST-001  HR= 72  @ 2026-02-18T09:00:00
-  [Sent #2] CUST-002  HR=145  @ 2026-02-18T09:00:00 ⚠ ANOMALY
+  [Sent #2] CUST-002  HR=145  @ 2026-02-18T09:00:00 [ANOMALY]
 ```
 
 ### Terminal 2 — Start the Consumer
@@ -87,7 +87,7 @@ Reads messages from Kafka, validates them, flags anomalies, and stores readings 
 [Consumer] Connected to Kafka at localhost:9092
 
   [Stored #1] CUST-001  HR= 72  @ 2026-02-18T09:00:00
-  [Stored #2] CUST-002  HR=145  @ 2026-02-18T09:00:00 ⚠ ANOMALY
+  [Stored #2] CUST-002  HR=145  @ 2026-02-18T09:00:00 [ANOMALY]
 ```
 
 Press `Ctrl+C` in each terminal to stop.

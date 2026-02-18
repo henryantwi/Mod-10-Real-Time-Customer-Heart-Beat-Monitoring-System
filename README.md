@@ -4,16 +4,12 @@ A data engineering pipeline that simulates heart rate monitors, streams readings
 
 ## Architecture
 
-```
-┌──────────────────┐     ┌───────────┐     ┌──────────────────┐     ┌────────────┐
-│  Data Generator  │────▶│   Kafka   │────▶│  Kafka Consumer  │────▶│ PostgreSQL │
-│  (Producer)      │     │  Broker   │     │  (Validator)     │     │  Database  │
-└──────────────────┘     └───────────┘     └──────────────────┘     └────────────┘
-                                                                          │
-                                                                    ┌─────▼──────┐
-                                                                    │  Grafana   │
-                                                                    │ Dashboard  │
-                                                                    └────────────┘
+```mermaid
+flowchart LR
+    Generator[Data Generator\n(Producer)] -->|JSON| Kafka[Kafka\nBroker]
+    Kafka -->|JSON| Consumer[Kafka Consumer\n(Validator)]
+    Consumer -->|SQL| DB[(PostgreSQL\nDatabase)]
+    Grafana[Grafana\nDashboard] -.->|Query| DB
 ```
 
 ## Prerequisites
