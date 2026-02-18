@@ -11,8 +11,8 @@ A data engineering pipeline that simulates heart rate monitors, streams readings
 └──────────────────┘     └───────────┘     └──────────────────┘     └────────────┘
                                                                           │
                                                                     ┌─────▼──────┐
+                                                                    │  Grafana   │
                                                                     │ Dashboard  │
-                                                                    │ (Optional) │
                                                                     └────────────┘
 ```
 
@@ -29,7 +29,7 @@ A data engineering pipeline that simulates heart rate monitors, streams readings
 docker-compose up -d
 ```
 
-This starts **Zookeeper**, **Kafka**, and **PostgreSQL**. The database schema is automatically created on first run.
+This starts **Zookeeper**, **Kafka**, **PostgreSQL**, and **Grafana**. The database schema is automatically created on first run.
 
 ### 2. Install Python Dependencies
 
@@ -62,17 +62,18 @@ cd tests
 python test_pipeline.py
 ```
 
-### 6. (Optional) Run the Dashboard
+### 6. Open the Grafana Dashboard
 
-```bash
-cd dashboard
-streamlit run app.py
-```
+Grafana starts automatically with Docker Compose and is pre-configured with a **Heartbeat Monitor** dashboard.
+
+1. Open **http://localhost:3000** in your browser
+2. The dashboard loads automatically (no login required)
+3. Panels auto-refresh every 5 seconds
 
 ## Project Structure
 
 ```
-├── docker-compose.yml       # Kafka + Zookeeper + PostgreSQL
+├── docker-compose.yml       # Kafka + Zookeeper + PostgreSQL + Grafana
 ├── requirements.txt         # Python dependencies
 ├── README.md                # This file
 ├── task.md                  # Assignment brief
@@ -93,8 +94,16 @@ streamlit run app.py
 ├── docs/
 │   └── screenshots/         # Terminal & DB screenshots
 │
+├── grafana/
+│   └── provisioning/
+│       ├── datasources/
+│       │   └── datasource.yml        # PostgreSQL connection config
+│       └── dashboards/
+│           ├── dashboard.yml         # Dashboard provider config
+│           └── heartbeat-monitor.json # Pre-built dashboard
+│
 └── dashboard/
-    └── app.py               # Streamlit dashboard (optional)
+    └── app.py               # Legacy Streamlit dashboard (reference)
 ```
 
 ## Configuration
