@@ -27,6 +27,8 @@ docker-compose up -d
 
 This starts **Zookeeper**, **Kafka**, **PostgreSQL**, and **Grafana**. The database schema is automatically created on first run.
 
+![All containers running](docs/screenshots/01_docker_ps.png)
+
 ### 2. Install Python Dependencies
 
 ```bash
@@ -65,6 +67,8 @@ Grafana starts automatically with Docker Compose and is pre-configured with a **
 1. Open **http://localhost:3000** in your browser
 2. The dashboard loads automatically (no login required)
 3. Panels auto-refresh every 5 seconds
+
+![Grafana Heartbeat Monitor dashboard](docs/screenshots/05_grafana_dashboard.png)
 
 ## Project Structure
 

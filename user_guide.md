@@ -43,6 +43,8 @@ The database schema (`sql/schema.sql`) is automatically applied on first run.
 rav run ps
 ```
 
+![Docker containers running](docs/screenshots/01_docker_ps.png)
+
 ### View live container logs
 
 ```bash
@@ -74,6 +76,8 @@ Generates synthetic heartbeat data for 5 simulated customers and sends it to Kaf
   [Sent #2] CUST-002  HR=145  @ 2026-02-18T09:00:00 [ANOMALY]
 ```
 
+![Producer terminal output](docs/screenshots/02_producer_output.png)
+
 ### Terminal 2 — Start the Consumer
 
 ```bash
@@ -89,6 +93,8 @@ Reads messages from Kafka, validates them, flags anomalies, and stores readings 
   [Stored #1] CUST-001  HR= 72  @ 2026-02-18T09:00:00
   [Stored #2] CUST-002  HR=145  @ 2026-02-18T09:00:00 [ANOMALY]
 ```
+
+![Consumer terminal output](docs/screenshots/03_consumer_output.png)
 
 Press `Ctrl+C` in each terminal to stop.
 
@@ -111,6 +117,14 @@ This prints the dashboard URL. Open it in your browser:
   - **Heart Rate Over Time** — live time-series chart with threshold markers
   - **Recent Anomalies** — table of flagged readings
 
+![Full Grafana dashboard](docs/screenshots/05_grafana_dashboard.png)
+
+![Customer Statistics panel](docs/screenshots/06_customer_statistics.png)
+
+![Heart Rate Over Time chart](docs/screenshots/07_heart_rate_chart.png)
+
+![Recent Anomalies table](docs/screenshots/08_recent_anomalies.png)
+
 ---
 
 ## 5. Run Tests
@@ -122,6 +136,8 @@ rav run test
 ```
 
 Runs component tests (data generator, DB connection, insert/query) from `tests/test_pipeline.py`.
+
+![Tests passing](docs/screenshots/04_tests_passing.png)
 
 ### Database connection test
 
