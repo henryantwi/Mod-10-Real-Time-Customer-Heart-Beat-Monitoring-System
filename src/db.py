@@ -98,16 +98,18 @@ def get_customer_stats() -> list[tuple]:
 
 # ── Quick standalone test ──────────────────────────────────────
 if __name__ == "__main__":
-    print("[DB] Testing connection...")
+    import logging
+    logging.basicConfig(level=logging.INFO)
+    logging.info("[DB] Testing connection...")
     try:
         conn = get_connection()
-        print("[DB] Connected successfully!")
+        logging.info("[DB] Connected successfully!")
         conn.close()
 
-        print("[DB] Querying latest readings...")
+        logging.info("[DB] Querying latest readings...")
         rows = query_latest_readings(5)
-        print(f"[DB] Latest {len(rows)} readings:")
+        logging.info(f"[DB] Latest {len(rows)} readings:")
         for row in rows:
-            print(f"  {row}")
+            logging.info(f"  {row}")
     except Exception as e:
-        print(f"[DB] Connection query failed: {e}")
+        logging.error(f"[DB] Connection query failed: {e}")

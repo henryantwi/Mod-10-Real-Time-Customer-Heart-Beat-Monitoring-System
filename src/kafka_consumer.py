@@ -8,6 +8,14 @@ Includes basic validation:
 
 import json
 import sys
+import logging
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 
 from kafka import KafkaConsumer
 
@@ -20,11 +28,11 @@ REQUIRED_FIELDS = {"customer_id", "timestamp", "heart_rate"}
 def validate_reading(reading: dict) -> bool:
     """Return True if the reading has all required fields and valid types."""
     if not REQUIRED_FIELDS.issubset(reading.keys()):
-        print(f"  [SKIP] Missing fields: {REQUIRED_FIELDS - reading.keys()}")
+        logging.warning(f"[SKIP] Missing fields: {REQUIRED_FIELDS - reading.keys()}")
         return False
 
     if not isinstance(reading["heart_rate"], (int, float)):
-        print(f"  [SKIP] Invalid heart_rate type: {type(reading['heart_rate'])}")
+        logging.warning(f"[SKIP] Invalid heart_rate type: {type(reading['heart_rate'])}")
         return False
 
     return True
@@ -56,8 +64,8 @@ def run_consumer():
     """Main loop — consumes messages, validates, and stores in PostgreSQL."""
     consumer = create_consumer()
 
-    print(f"[Consumer] Listening on topic: {KAFKA_TOPIC}")
-    print(f"[Consumer] Connected to Kafka at {KAFKA_BOOTSTRAP_SERVERS}\n")
+    logging.info(f"[Consumer] Listening on topic: {KAFKA_TOPIC}")
+    logging.info(f"[Consumer] Connected to Kafka at {KAFKA_BOOTSTRAP_SERVERS}")
 
     message_count = 0
     stored_count = 0
@@ -78,17 +86,17 @@ def run_consumer():
             try:
                 insert_reading(reading)
                 stored_count += 1
-                flag = " ⚠ ANOMALY" if reading["is_anomaly"] else ""
-                print(
-                    f"  [Stored #{stored_count}] "
+                flag = " [ANOMALY]" if reading["is_anomaly"] else ""
+                logging.info(
+                    f"[Stored #{stored_count}] "
                     f"{reading['customer_id']}  HR={reading['heart_rate']:>3}"
                     f"  @ {reading['timestamp']}{flag}"
                 )
             except Exception as e:
-                print(f"  [ERROR] Failed to store reading: {e}")
+                logging.error(f"Failed to store reading: {e}")
 
     except KeyboardInterrupt:
-        print(f"\n[Consumer] Stopped. Messages received: {message_count}, Stored: {stored_count}")
+        logging.info(f"[Consumer] Stopped. Messages received: {message_count}, Stored: {stored_count}")
     finally:
         consumer.close()
 

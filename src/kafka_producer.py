@@ -8,6 +8,14 @@ configured Kafka topic at a regular interval.
 import json
 import sys
 import time
+import logging
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 
 from kafka import KafkaProducer
 
@@ -28,9 +36,9 @@ def run_producer():
     producer = create_producer()
     customer_ids = generate_customer_ids(NUM_CUSTOMERS)
 
-    print(f"[Producer] Connected to Kafka at {KAFKA_BOOTSTRAP_SERVERS}")
-    print(f"[Producer] Publishing to topic: {KAFKA_TOPIC}")
-    print(f"[Producer] Simulating {len(customer_ids)} customers\n")
+    logging.info(f"[Producer] Connected to Kafka at {KAFKA_BOOTSTRAP_SERVERS}")
+    logging.info(f"[Producer] Publishing to topic: {KAFKA_TOPIC}")
+    logging.info(f"[Producer] Simulating {len(customer_ids)} customers")
 
     message_count = 0
 
@@ -41,9 +49,9 @@ def run_producer():
                 producer.send(KAFKA_TOPIC, value=reading)
                 message_count += 1
 
-                flag = " ⚠ ANOMALY" if reading["is_anomaly"] else ""
-                print(
-                    f"  [Sent #{message_count}] "
+                flag = " [ANOMALY]" if reading["is_anomaly"] else ""
+                logging.info(
+                    f"[Sent #{message_count}] "
                     f"{reading['customer_id']}  HR={reading['heart_rate']:>3}"
                     f"  @ {reading['timestamp']}{flag}"
                 )
@@ -52,7 +60,7 @@ def run_producer():
             time.sleep(SEND_INTERVAL_SECONDS)
 
     except KeyboardInterrupt:
-        print(f"\n[Producer] Stopped. Total messages sent: {message_count}")
+        logging.info(f"[Producer] Stopped. Total messages sent: {message_count}")
     finally:
         producer.close()
 
