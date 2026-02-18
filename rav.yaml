@@ -1,0 +1,20 @@
+name: monitoring-system
+scripts:
+  # ── Infrastructure ───────────────────────────────────────────
+  up: docker compose up -d
+  down: docker compose down
+  reset: docker compose down -v
+  logs: docker compose logs -f
+  ps: docker compose ps
+
+  # ── Pipeline ─────────────────────────────────────────────────
+  producer: uv run src/kafka_producer.py
+  consumer: uv run src/kafka_consumer.py
+
+  # ── Testing ──────────────────────────────────────────────────
+  test: uv run tests/test_pipeline.py
+  db-test: uv run src/db.py
+
+  # ── Utilities ────────────────────────────────────────────────
+  install: uv add -r requirements.txt
+  grafana: echo "Open http://localhost:3000/d/heartbeat-monitor in your browser"

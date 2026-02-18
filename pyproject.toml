@@ -1,0 +1,13 @@
+[project]
+name = "monitoring-system"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "faker==22.0.0",
+    "kafka-python-ng==2.2.2",
+    "pg8000==1.30.5",
+    "rav>=0.4.3",
+    "streamlit>=1.42.0",
+]
