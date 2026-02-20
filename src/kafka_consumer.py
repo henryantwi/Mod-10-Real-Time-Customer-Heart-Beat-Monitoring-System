@@ -17,7 +17,7 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 
-from kafka import KafkaConsumer
+from confluent_kafka import Consumer, KafkaError
 
 from config import KAFKA_BOOTSTRAP_SERVERS, KAFKA_TOPIC, NORMAL_HR_HIGH, NORMAL_HR_LOW
 from db import insert_reading
@@ -48,21 +48,20 @@ def flag_anomaly(reading: dict) -> dict:
     return reading
 
 
-def create_consumer() -> KafkaConsumer:
+def create_consumer() -> Consumer:
     """Create and return a KafkaConsumer that deserializes JSON messages."""
-    return KafkaConsumer(
-        KAFKA_TOPIC,
-        bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
-        auto_offset_reset="earliest",
-        enable_auto_commit=True,
-        group_id="heartbeat-consumer-group",
-        value_deserializer=lambda m: json.loads(m.decode("utf-8")),
-    )
+    return Consumer({
+        'bootstrap.servers': KAFKA_BOOTSTRAP_SERVERS,
+        'group.id': 'heartbeat-consumer-group',
+        'auto.offset.reset': 'earliest',
+        'enable.auto.commit': True
+    })
 
 
 def run_consumer():
     """Main loop — consumes messages, validates, and stores in PostgreSQL."""
     consumer = create_consumer()
+    consumer.subscribe([KAFKA_TOPIC])
 
     logging.info(f"[Consumer] Listening on topic: {KAFKA_TOPIC}")
     logging.info(f"[Consumer] Connected to Kafka at {KAFKA_BOOTSTRAP_SERVERS}")
@@ -71,8 +70,17 @@ def run_consumer():
     stored_count = 0
 
     try:
-        for message in consumer:
-            reading = message.value
+        while True:
+            msg = consumer.poll(1.0)
+            if msg is None:
+                continue
+            if msg.error():
+                if msg.error().code() == KafkaError._PARTITION_EOF:
+                    continue
+                logging.error(f"Consumer error: {msg.error()}")
+                continue
+
+            reading = json.loads(msg.value().decode("utf-8"))
             message_count += 1
 
             # Validate

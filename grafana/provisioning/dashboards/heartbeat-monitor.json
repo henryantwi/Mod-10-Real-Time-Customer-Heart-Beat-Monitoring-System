@@ -462,8 +462,8 @@
                     "custom": {
                         "drawStyle": "line",
                         "lineInterpolation": "smooth",
-                        "lineWidth": 2,
-                        "fillOpacity": 8,
+                        "lineWidth": 1,
+                        "fillOpacity": 0,
                         "showPoints": "never",
                         "spanNulls": true,
                         "axisSoftMin": 40,
@@ -510,7 +510,7 @@
                 "type": "postgres",
                 "uid": "heartbeat-postgres"
             },
-            "description": "Comparison of average heart rate per customer. Bar color reflects health thresholds: Blue (< 60 bpm, low), Green (60-90 bpm, normal), Yellow (90-110 bpm, elevated), Red (> 110 bpm, critical).",
+            "description": "A comprehensive roster showing each customer's average heart rate alongside a trend sparkline. This provides instant context on whether a customer's heart rate is stable, rising, or fluctuating.",
             "gridPos": {
                 "h": 11,
                 "w": 8,
@@ -518,9 +518,20 @@
                 "y": 7
             },
             "id": 6,
-            "title": "Avg Heart Rate by Customer",
-            "type": "bargauge",
+            "title": "Patient Roster & Trends",
+            "type": "table",
             "targets": [
+                {
+                    "datasource": {
+                        "type": "postgres",
+                        "uid": "heartbeat-postgres"
+                    },
+                    "editorMode": "code",
+                    "format": "time_series",
+                    "rawQuery": true,
+                    "rawSql": "SELECT recorded_at AS \"time\", customer_id AS metric, heart_rate AS \"value\" FROM heartbeat_readings WHERE $__timeFilter(recorded_at) ORDER BY recorded_at;",
+                    "refId": "A"
+                },
                 {
                     "datasource": {
                         "type": "postgres",
@@ -530,7 +541,29 @@
                     "format": "table",
                     "rawQuery": true,
                     "rawSql": "SELECT customer_id AS \"Customer\", ROUND(AVG(heart_rate)::numeric, 1) AS \"Avg HR\" FROM heartbeat_readings WHERE $__timeFilter(recorded_at) GROUP BY customer_id ORDER BY customer_id;",
-                    "refId": "A"
+                    "refId": "B"
+                }
+            ],
+            "transformations": [
+                {
+                    "id": "timeSeriesTable",
+                    "options": {}
+                },
+                {
+                    "id": "merge",
+                    "options": {}
+                },
+                {
+                    "id": "organize",
+                    "options": {
+                        "excludeByName": {},
+                        "indexByName": {
+                            "Customer": 0,
+                            "Avg HR": 1,
+                            "Trend": 2
+                        },
+                        "renameByName": {}
+                    }
                 }
             ],
             "fieldConfig": {
@@ -538,19 +571,20 @@
                     "color": {
                         "mode": "thresholds"
                     },
-                    "min": 40,
-                    "max": 140,
-                    "unit": "bpm",
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "filterable": false
+                    },
+                    "decimals": 1,
                     "thresholds": {
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "blue",
-                                "value": null
-                            },
-                            {
                                 "color": "green",
-                                "value": 60
+                                "value": null
                             },
                             {
                                 "color": "yellow",
@@ -563,14 +597,52 @@
                         ]
                     }
                 },
-                "overrides": []
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Trend"
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.cellOptions",
+                                "value": {
+                                    "fillOpacity": 20,
+                                    "lineWidth": 2,
+                                    "mode": "basic",
+                                    "type": "sparkline"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Avg HR"
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.cellOptions",
+                                "value": {
+                                    "mode": "basic",
+                                    "type": "color-text"
+                                }
+                            }
+                        ]
+                    }
+                ]
             },
             "options": {
-                "displayMode": "gradient",
-                "orientation": "horizontal",
-                "showUnfilled": true,
-                "valueMode": "text",
-                "namePlacement": "auto"
+                "cellHeight": "md",
+                "footer": {
+                    "countRows": false,
+                    "fields": "",
+                    "reducer": [
+                        "sum"
+                    ],
+                    "show": false
+                },
+                "showHeader": true
             }
         },
         {
@@ -590,7 +662,7 @@
                 "type": "postgres",
                 "uid": "heartbeat-postgres"
             },
-            "description": "Proportion of normal vs anomalous readings. A healthy system should show anomalies at < 5% of total volume.",
+            "description": "Continuous tracking of customer heart rate status over time. Normal readings (<100 bpm) are shown in green, while anomalous readings (>100 bpm) span in red. This timeline view helps pinpoint the exact moment anomalies occurred for specific customers.",
             "gridPos": {
                 "h": 9,
                 "w": 5,
@@ -598,8 +670,8 @@
                 "y": 19
             },
             "id": 7,
-            "title": "Reading Distribution",
-            "type": "piechart",
+            "title": "Anomaly State Timeline",
+            "type": "state-timeline",
             "targets": [
                 {
                     "datasource": {
@@ -607,70 +679,67 @@
                         "uid": "heartbeat-postgres"
                     },
                     "editorMode": "code",
-                    "format": "table",
+                    "format": "time_series",
                     "rawQuery": true,
-                    "rawSql": "SELECT CASE WHEN is_anomaly THEN 'Anomalies' ELSE 'Normal' END AS metric, COUNT(*) AS value FROM heartbeat_readings WHERE $__timeFilter(recorded_at) GROUP BY is_anomaly;",
+                    "rawSql": "SELECT recorded_at AS time, customer_id AS metric, CASE WHEN is_anomaly THEN 1 ELSE 0 END AS value FROM heartbeat_readings WHERE $__timeFilter(recorded_at) ORDER BY recorded_at;",
                     "refId": "A"
                 }
             ],
             "fieldConfig": {
                 "defaults": {
                     "color": {
-                        "mode": "palette-classic"
+                        "mode": "thresholds"
+                    },
+                    "custom": {
+                        "lineWidth": 0,
+                        "fillOpacity": 80,
+                        "rowHeight": 1
+                    },
+                    "mappings": [
+                        {
+                            "options": {
+                                "0": {
+                                    "color": "green",
+                                    "index": 0,
+                                    "text": "Normal"
+                                },
+                                "1": {
+                                    "color": "red",
+                                    "index": 1,
+                                    "text": "Anomaly"
+                                }
+                            },
+                            "type": "value"
+                        }
+                    ],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 1
+                            }
+                        ]
                     }
                 },
-                "overrides": [
-                    {
-                        "matcher": {
-                            "id": "byName",
-                            "options": "Normal"
-                        },
-                        "properties": [
-                            {
-                                "id": "color",
-                                "value": {
-                                    "fixedColor": "semi-dark-green",
-                                    "mode": "fixed"
-                                }
-                            }
-                        ]
-                    },
-                    {
-                        "matcher": {
-                            "id": "byName",
-                            "options": "Anomalies"
-                        },
-                        "properties": [
-                            {
-                                "id": "color",
-                                "value": {
-                                    "fixedColor": "semi-dark-red",
-                                    "mode": "fixed"
-                                }
-                            }
-                        ]
-                    }
-                ]
+                "overrides": []
             },
             "options": {
-                "pieType": "donut",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
+                "mergeValues": true,
+                "showValue": "never",
+                "alignValue": "left",
+                "rowHeight": 0.9,
                 "legend": {
                     "displayMode": "list",
-                    "placement": "bottom",
-                    "values": [
-                        "value",
-                        "percent"
-                    ]
+                    "placement": "bottom"
                 },
                 "tooltip": {
-                    "mode": "multi"
+                    "mode": "single",
+                    "sort": "none"
                 }
             }
         },

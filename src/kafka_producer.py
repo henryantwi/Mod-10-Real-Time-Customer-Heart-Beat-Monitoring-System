@@ -17,18 +17,17 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 
-from kafka import KafkaProducer
+from confluent_kafka import Producer
 
 from config import KAFKA_BOOTSTRAP_SERVERS, KAFKA_TOPIC, SEND_INTERVAL_SECONDS, NUM_CUSTOMERS
 from data_generator import generate_batch, generate_customer_ids
 
 
-def create_producer() -> KafkaProducer:
+def create_producer() -> Producer:
     """Create and return a KafkaProducer that serializes values as JSON."""
-    return KafkaProducer(
-        bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
-        value_serializer=lambda v: json.dumps(v).encode("utf-8"),
-    )
+    return Producer({
+        'bootstrap.servers': KAFKA_BOOTSTRAP_SERVERS
+    })
 
 
 def run_producer():
@@ -41,13 +40,21 @@ def run_producer():
     logging.info(f"[Producer] Simulating {len(customer_ids)} customers")
 
     message_count = 0
+        
+    def delivery_report(err, msg):
+        if err is not None:
+            logging.error(f"Message delivery failed: {err}")
 
+    # Continuously generate and send batches of readings
     try:
         while True:
             batch = generate_batch(customer_ids)
             for reading in batch:
-                producer.send(KAFKA_TOPIC, value=reading)
+                val_bytes = json.dumps(reading).encode("utf-8")
+                producer.produce(KAFKA_TOPIC, value=val_bytes, callback=delivery_report)
+                producer.poll(0)
                 message_count += 1
+
 
                 flag = " [ANOMALY]" if reading["is_anomaly"] else ""
                 logging.info(
@@ -62,7 +69,7 @@ def run_producer():
     except KeyboardInterrupt:
         logging.info(f"[Producer] Stopped. Total messages sent: {message_count}")
     finally:
-        producer.close()
+        producer.flush()
 
 
 if __name__ == "__main__":
