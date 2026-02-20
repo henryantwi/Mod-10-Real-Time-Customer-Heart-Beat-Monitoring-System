@@ -429,7 +429,7 @@
                 "type": "postgres",
                 "uid": "heartbeat-postgres"
             },
-            "description": "Individual heart rate readings over time, split by customer ID. The dashed red threshold line at 100 bpm marks the upper boundary of the normal range. Spikes above this line indicate anomalous readings. The legend table shows statistical summaries per customer.",
+            "description": "Average heart rate across all customers plotted over time. The dashed red threshold line at 100 bpm marks the upper boundary of the normal range. Spikes above this line indicate periods of elevated readings.",
             "gridPos": {
                 "h": 11,
                 "w": 16,
@@ -437,7 +437,7 @@
                 "y": 7
             },
             "id": 5,
-            "title": "Heart Rate Over Time (per Customer)",
+            "title": "Average Heart Rate Over Time",
             "type": "timeseries",
             "targets": [
                 {
@@ -448,14 +448,15 @@
                     "editorMode": "code",
                     "format": "table",
                     "rawQuery": true,
-                    "rawSql": "SELECT recorded_at AS time, heart_rate, customer_id AS metric FROM heartbeat_readings WHERE $__timeFilter(recorded_at) ORDER BY recorded_at;",
+                    "rawSql": "SELECT date_trunc('second', recorded_at) AS time, ROUND(AVG(heart_rate)::numeric, 1) AS \"heart_rate\" FROM heartbeat_readings WHERE $__timeFilter(recorded_at) GROUP BY 1 ORDER BY 1;",
                     "refId": "A"
                 }
             ],
             "fieldConfig": {
                 "defaults": {
                     "color": {
-                        "mode": "palette-classic"
+                        "fixedColor": "green",
+                        "mode": "fixed"
                     },
                     "unit": "bpm",
                     "custom": {
@@ -494,13 +495,12 @@
                     "sort": "desc"
                 },
                 "legend": {
-                    "displayMode": "table",
+                    "displayMode": "list",
                     "placement": "bottom",
                     "calcs": [
                         "mean",
                         "min",
-                        "max",
-                        "lastNotNull"
+                        "max"
                     ]
                 }
             }
