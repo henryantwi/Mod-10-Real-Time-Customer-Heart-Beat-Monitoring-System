@@ -1,19 +1,6 @@
 {
     "annotations": {
-        "list": [
-            {
-                "builtIn": 1,
-                "datasource": {
-                    "type": "grafana",
-                    "uid": "-- Grafana --"
-                },
-                "enable": true,
-                "hide": true,
-                "iconColor": "rgba(0, 211, 255, 1)",
-                "name": "Annotations & Alerts",
-                "type": "dashboard"
-            }
-        ]
+        "list": []
     },
     "editable": true,
     "fiscalYearStartMonth": 0,
@@ -22,147 +9,31 @@
     "links": [],
     "panels": [
         {
-            "datasource": {
-                "type": "postgres",
-                "uid": "heartbeat-postgres"
-            },
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "thresholds"
-                    },
-                    "custom": {
-                        "align": "auto",
-                        "cellOptions": {
-                            "type": "auto"
-                        },
-                        "inspect": false
-                    },
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            },
-                            {
-                                "color": "red",
-                                "value": 80
-                            }
-                        ]
-                    }
-                },
-                "overrides": [
-                    {
-                        "matcher": {
-                            "id": "byName",
-                            "options": "avg_hr"
-                        },
-                        "properties": [
-                            {
-                                "id": "custom.cellOptions",
-                                "value": {
-                                    "mode": "gradient",
-                                    "type": "gauge"
-                                }
-                            },
-                            {
-                                "id": "min",
-                                "value": 40
-                            },
-                            {
-                                "id": "max",
-                                "value": 160
-                            },
-                            {
-                                "id": "thresholds",
-                                "value": {
-                                    "mode": "absolute",
-                                    "steps": [
-                                        {
-                                            "color": "blue",
-                                            "value": null
-                                        },
-                                        {
-                                            "color": "green",
-                                            "value": 60
-                                        },
-                                        {
-                                            "color": "yellow",
-                                            "value": 100
-                                        },
-                                        {
-                                            "color": "red",
-                                            "value": 120
-                                        }
-                                    ]
-                                }
-                            }
-                        ]
-                    },
-                    {
-                        "matcher": {
-                            "id": "byName",
-                            "options": "anomaly_count"
-                        },
-                        "properties": [
-                            {
-                                "id": "thresholds",
-                                "value": {
-                                    "mode": "absolute",
-                                    "steps": [
-                                        {
-                                            "color": "green",
-                                            "value": null
-                                        },
-                                        {
-                                            "color": "orange",
-                                            "value": 1
-                                        },
-                                        {
-                                            "color": "red",
-                                            "value": 5
-                                        }
-                                    ]
-                                }
-                            },
-                            {
-                                "id": "custom.cellOptions",
-                                "value": {
-                                    "mode": "basic",
-                                    "type": "color-background"
-                                }
-                            }
-                        ]
-                    }
-                ]
-            },
+            "collapsed": false,
             "gridPos": {
-                "h": 8,
+                "h": 1,
                 "w": 24,
                 "x": 0,
                 "y": 0
             },
-            "id": 1,
-            "options": {
-                "cellHeight": "sm",
-                "footer": {
-                    "countRows": false,
-                    "fields": "",
-                    "reducer": [
-                        "sum"
-                    ],
-                    "show": false
-                },
-                "showHeader": true,
-                "sortBy": [
-                    {
-                        "desc": false,
-                        "displayName": "customer_id"
-                    }
-                ]
+            "id": 100,
+            "title": "Key Metrics",
+            "type": "row"
+        },
+        {
+            "datasource": {
+                "type": "postgres",
+                "uid": "heartbeat-postgres"
             },
-            "pluginVersion": "11.4.0",
+            "gridPos": {
+                "h": 4,
+                "w": 6,
+                "x": 0,
+                "y": 1
+            },
+            "id": 1,
+            "title": "Active Customers",
+            "type": "stat",
             "targets": [
                 {
                     "datasource": {
@@ -172,52 +43,255 @@
                     "editorMode": "code",
                     "format": "table",
                     "rawQuery": true,
-                    "rawSql": "SELECT\n  customer_id,\n  COUNT(*)                              AS total_readings,\n  ROUND(AVG(heart_rate)::numeric, 1)    AS avg_hr,\n  MIN(heart_rate)                       AS min_hr,\n  MAX(heart_rate)                       AS max_hr,\n  SUM(CASE WHEN is_anomaly THEN 1 ELSE 0 END) AS anomaly_count\nFROM heartbeat_readings\nWHERE $__timeFilter(recorded_at)\nGROUP BY customer_id\nORDER BY customer_id;",
+                    "rawSql": "SELECT COUNT(DISTINCT customer_id) AS \"value\" FROM heartbeat_readings WHERE $__timeFilter(recorded_at);",
                     "refId": "A"
                 }
             ],
-            "title": "Customer Statistics",
-            "type": "table"
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "fixedColor": "blue",
+                        "mode": "fixed"
+                    },
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "blue",
+                                "value": null
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "options": {
+                "colorMode": "background",
+                "graphMode": "none",
+                "textMode": "value_and_name",
+                "orientation": "auto"
+            }
         },
         {
             "datasource": {
                 "type": "postgres",
                 "uid": "heartbeat-postgres"
             },
+            "gridPos": {
+                "h": 4,
+                "w": 6,
+                "x": 6,
+                "y": 1
+            },
+            "id": 2,
+            "title": "Total Readings",
+            "type": "stat",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "postgres",
+                        "uid": "heartbeat-postgres"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT COUNT(*) AS \"value\" FROM heartbeat_readings WHERE $__timeFilter(recorded_at);",
+                    "refId": "A"
+                }
+            ],
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "fixedColor": "green",
+                        "mode": "fixed"
+                    },
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "options": {
+                "colorMode": "background",
+                "graphMode": "area",
+                "textMode": "value_and_name",
+                "orientation": "auto"
+            }
+        },
+        {
+            "datasource": {
+                "type": "postgres",
+                "uid": "heartbeat-postgres"
+            },
+            "gridPos": {
+                "h": 4,
+                "w": 6,
+                "x": 12,
+                "y": 1
+            },
+            "id": 3,
+            "title": "Anomalies Detected",
+            "type": "stat",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "postgres",
+                        "uid": "heartbeat-postgres"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT SUM(CASE WHEN is_anomaly THEN 1 ELSE 0 END) AS \"value\" FROM heartbeat_readings WHERE $__timeFilter(recorded_at);",
+                    "refId": "A"
+                }
+            ],
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "fixedColor": "orange",
+                        "mode": "fixed"
+                    },
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "orange",
+                                "value": null
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "options": {
+                "colorMode": "background",
+                "graphMode": "area",
+                "textMode": "value_and_name",
+                "orientation": "auto"
+            }
+        },
+        {
+            "datasource": {
+                "type": "postgres",
+                "uid": "heartbeat-postgres"
+            },
+            "gridPos": {
+                "h": 4,
+                "w": 6,
+                "x": 18,
+                "y": 1
+            },
+            "id": 4,
+            "title": "Anomaly Rate",
+            "type": "gauge",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "postgres",
+                        "uid": "heartbeat-postgres"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT ROUND(100.0 * SUM(CASE WHEN is_anomaly THEN 1 ELSE 0 END) / NULLIF(COUNT(*), 0), 1) AS \"value\" FROM heartbeat_readings WHERE $__timeFilter(recorded_at);",
+                    "refId": "A"
+                }
+            ],
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "min": 0,
+                    "max": 100,
+                    "unit": "percent",
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "yellow",
+                                "value": 5
+                            },
+                            {
+                                "color": "orange",
+                                "value": 10
+                            },
+                            {
+                                "color": "red",
+                                "value": 20
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "options": {
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true
+            }
+        },
+        {
+            "collapsed": false,
+            "gridPos": {
+                "h": 1,
+                "w": 24,
+                "x": 0,
+                "y": 5
+            },
+            "id": 101,
+            "title": "Heart Rate Analysis",
+            "type": "row"
+        },
+        {
+            "datasource": {
+                "type": "postgres",
+                "uid": "heartbeat-postgres"
+            },
+            "gridPos": {
+                "h": 10,
+                "w": 16,
+                "x": 0,
+                "y": 6
+            },
+            "id": 5,
+            "title": "Heart Rate Over Time (per Customer)",
+            "type": "timeseries",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "postgres",
+                        "uid": "heartbeat-postgres"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT recorded_at AS time, heart_rate, customer_id AS metric FROM heartbeat_readings WHERE $__timeFilter(recorded_at) ORDER BY recorded_at;",
+                    "refId": "A"
+                }
+            ],
             "fieldConfig": {
                 "defaults": {
                     "color": {
                         "mode": "palette-classic"
                     },
+                    "unit": "bpm",
                     "custom": {
-                        "axisBorderShow": false,
-                        "axisCenteredZero": false,
-                        "axisColorMode": "text",
-                        "axisLabel": "Heart Rate (bpm)",
-                        "axisPlacement": "auto",
-                        "barAlignment": 0,
-                        "barWidthFactor": 0.6,
                         "drawStyle": "line",
-                        "fillOpacity": 10,
-                        "gradientMode": "scheme",
-                        "hideFrom": {
-                            "legend": false,
-                            "tooltip": false,
-                            "viz": false
-                        },
-                        "insertNulls": false,
                         "lineInterpolation": "smooth",
                         "lineWidth": 2,
-                        "pointSize": 4,
-                        "scaleDistribution": {
-                            "type": "linear"
-                        },
-                        "showPoints": "auto",
-                        "spanNulls": false,
-                        "stacking": {
-                            "group": "A",
-                            "mode": "none"
-                        },
+                        "fillOpacity": 8,
+                        "showPoints": "never",
+                        "spanNulls": true,
                         "thresholdsStyle": {
                             "mode": "dashed"
                         }
@@ -226,47 +300,48 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "red",
+                                "color": "transparent",
                                 "value": null
-                            },
-                            {
-                                "color": "green",
-                                "value": 60
                             },
                             {
                                 "color": "red",
                                 "value": 100
                             }
                         ]
-                    },
-                    "unit": "bpm"
+                    }
                 },
                 "overrides": []
             },
-            "gridPos": {
-                "h": 10,
-                "w": 24,
-                "x": 0,
-                "y": 8
-            },
-            "id": 2,
             "options": {
+                "tooltip": {
+                    "mode": "multi",
+                    "sort": "desc"
+                },
                 "legend": {
+                    "displayMode": "table",
+                    "placement": "bottom",
                     "calcs": [
                         "mean",
                         "min",
                         "max"
-                    ],
-                    "displayMode": "table",
-                    "placement": "bottom",
-                    "showLegend": true
-                },
-                "tooltip": {
-                    "mode": "multi",
-                    "sort": "desc"
+                    ]
                 }
+            }
+        },
+        {
+            "datasource": {
+                "type": "postgres",
+                "uid": "heartbeat-postgres"
             },
-            "pluginVersion": "11.4.0",
+            "gridPos": {
+                "h": 10,
+                "w": 8,
+                "x": 16,
+                "y": 6
+            },
+            "id": 6,
+            "title": "Avg Heart Rate by Customer",
+            "type": "bargauge",
             "targets": [
                 {
                     "datasource": {
@@ -276,30 +351,232 @@
                     "editorMode": "code",
                     "format": "table",
                     "rawQuery": true,
-                    "rawSql": "SELECT\n  recorded_at AS time,\n  heart_rate,\n  customer_id AS metric\nFROM heartbeat_readings\nWHERE $__timeFilter(recorded_at)\nORDER BY recorded_at;",
+                    "rawSql": "SELECT customer_id, ROUND(AVG(heart_rate)::numeric, 1) AS \"heart_rate\" FROM heartbeat_readings WHERE $__timeFilter(recorded_at) GROUP BY customer_id ORDER BY customer_id;",
                     "refId": "A"
                 }
             ],
-            "title": "Heart Rate Over Time",
-            "type": "timeseries"
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "min": 40,
+                    "max": 140,
+                    "unit": "bpm",
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "blue",
+                                "value": null
+                            },
+                            {
+                                "color": "green",
+                                "value": 60
+                            },
+                            {
+                                "color": "yellow",
+                                "value": 90
+                            },
+                            {
+                                "color": "red",
+                                "value": 110
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "options": {
+                "displayMode": "gradient",
+                "orientation": "horizontal",
+                "showUnfilled": true,
+                "valueMode": "text"
+            }
+        },
+        {
+            "collapsed": false,
+            "gridPos": {
+                "h": 1,
+                "w": 24,
+                "x": 0,
+                "y": 16
+            },
+            "id": 102,
+            "title": "Anomaly Intelligence",
+            "type": "row"
         },
         {
             "datasource": {
                 "type": "postgres",
                 "uid": "heartbeat-postgres"
             },
+            "gridPos": {
+                "h": 8,
+                "w": 5,
+                "x": 0,
+                "y": 17
+            },
+            "id": 7,
+            "title": "Reading Distribution",
+            "type": "piechart",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "postgres",
+                        "uid": "heartbeat-postgres"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT CASE WHEN is_anomaly THEN 'Anomalies' ELSE 'Normal' END AS metric, COUNT(*) AS value FROM heartbeat_readings WHERE $__timeFilter(recorded_at) GROUP BY is_anomaly;",
+                    "refId": "A"
+                }
+            ],
             "fieldConfig": {
                 "defaults": {
                     "color": {
-                        "mode": "fixed",
-                        "fixedColor": "red"
+                        "mode": "palette-classic"
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Normal"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "semi-dark-green",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Anomalies"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "semi-dark-red",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            "options": {
+                "pieType": "donut",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "legend": {
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "values": [
+                        "percent"
+                    ]
+                },
+                "tooltip": {
+                    "mode": "single"
+                }
+            }
+        },
+        {
+            "datasource": {
+                "type": "postgres",
+                "uid": "heartbeat-postgres"
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 7,
+                "x": 5,
+                "y": 17
+            },
+            "id": 8,
+            "title": "Anomalies per Customer",
+            "type": "timeseries",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "postgres",
+                        "uid": "heartbeat-postgres"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT date_trunc('minute', recorded_at) AS time, customer_id AS metric, SUM(CASE WHEN is_anomaly THEN 1 ELSE 0 END) AS \"value\" FROM heartbeat_readings WHERE $__timeFilter(recorded_at) GROUP BY 1, customer_id ORDER BY 1;",
+                    "refId": "A"
+                }
+            ],
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
                     },
                     "custom": {
-                        "align": "auto",
-                        "cellOptions": {
-                            "type": "auto"
-                        },
-                        "inspect": false
+                        "drawStyle": "bars",
+                        "fillOpacity": 60,
+                        "lineWidth": 0,
+                        "stacking": {
+                            "mode": "normal"
+                        }
+                    }
+                },
+                "overrides": []
+            },
+            "options": {
+                "tooltip": {
+                    "mode": "multi"
+                },
+                "legend": {
+                    "displayMode": "list",
+                    "placement": "bottom"
+                }
+            }
+        },
+        {
+            "datasource": {
+                "type": "postgres",
+                "uid": "heartbeat-postgres"
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 17
+            },
+            "id": 9,
+            "title": "Recent Anomaly Details",
+            "type": "table",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "postgres",
+                        "uid": "heartbeat-postgres"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT customer_id, heart_rate, recorded_at FROM heartbeat_readings WHERE is_anomaly = TRUE AND $__timeFilter(recorded_at) ORDER BY recorded_at DESC LIMIT 20;",
+                    "refId": "A"
+                }
+            ],
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
                     },
                     "thresholds": {
                         "mode": "absolute",
@@ -310,9 +587,15 @@
                             },
                             {
                                 "color": "red",
-                                "value": 80
+                                "value": 100
                             }
                         ]
+                    },
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        }
                     }
                 },
                 "overrides": [
@@ -335,12 +618,12 @@
                                     "mode": "absolute",
                                     "steps": [
                                         {
-                                            "color": "blue",
+                                            "color": "orange",
                                             "value": null
                                         },
                                         {
                                             "color": "red",
-                                            "value": 100
+                                            "value": 120
                                         }
                                     ]
                                 }
@@ -349,47 +632,13 @@
                     }
                 ]
             },
-            "gridPos": {
-                "h": 8,
-                "w": 24,
-                "x": 0,
-                "y": 18
-            },
-            "id": 3,
             "options": {
+                "showHeader": true,
                 "cellHeight": "sm",
                 "footer": {
-                    "countRows": false,
-                    "fields": "",
-                    "reducer": [
-                        "sum"
-                    ],
                     "show": false
-                },
-                "showHeader": true,
-                "sortBy": [
-                    {
-                        "desc": true,
-                        "displayName": "recorded_at"
-                    }
-                ]
-            },
-            "pluginVersion": "11.4.0",
-            "targets": [
-                {
-                    "datasource": {
-                        "type": "postgres",
-                        "uid": "heartbeat-postgres"
-                    },
-                    "editorMode": "code",
-                    "format": "table",
-                    "rawQuery": true,
-                    "rawSql": "SELECT\n  customer_id,\n  heart_rate,\n  recorded_at\nFROM heartbeat_readings\nWHERE is_anomaly = TRUE\n  AND $__timeFilter(recorded_at)\nORDER BY recorded_at DESC\nLIMIT 50;",
-                    "refId": "A"
                 }
-            ],
-            "title": "Recent Anomalies",
-            "type": "table"
+            }
         }
     ],
     "refresh": "5s",
@@ -397,18 +646,18 @@
     "tags": [
         "heartbeat",
         "monitoring",
-        "postgresql"
+        "real-time"
     ],
     "templating": {
         "list": []
     },
     "time": {
-        "from": "now-1h",
+        "from": "now-5m",
         "to": "now"
     },
     "timepicker": {},
     "timezone": "browser",
-    "title": "Heartbeat Monitor",
+    "title": "Heartbeat Monitoring Overview",
     "uid": "heartbeat-monitor",
-    "version": 1
+    "version": 3
 }
