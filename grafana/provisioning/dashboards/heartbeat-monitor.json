@@ -2,6 +2,7 @@
     "annotations": {
         "list": []
     },
+    "description": "Real-time monitoring of customer heartbeat readings ingested via Apache Kafka and stored in PostgreSQL. This dashboard provides operational visibility into data volume, anomaly detection rates, and per-customer heart rate trends.",
     "editable": true,
     "fiscalYearStartMonth": 0,
     "graphTooltip": 1,
@@ -17,7 +18,7 @@
                 "y": 0
             },
             "id": 100,
-            "title": "Key Metrics",
+            "title": "Operational Overview",
             "type": "row"
         },
         {
@@ -25,9 +26,10 @@
                 "type": "postgres",
                 "uid": "heartbeat-postgres"
             },
+            "description": "Number of unique customers currently sending heartbeat data within the selected time window.",
             "gridPos": {
-                "h": 4,
-                "w": 6,
+                "h": 5,
+                "w": 4,
                 "x": 0,
                 "y": 1
             },
@@ -43,21 +45,22 @@
                     "editorMode": "code",
                     "format": "table",
                     "rawQuery": true,
-                    "rawSql": "SELECT COUNT(DISTINCT customer_id) AS \"value\" FROM heartbeat_readings WHERE $__timeFilter(recorded_at);",
+                    "rawSql": "SELECT COUNT(DISTINCT customer_id) AS \"Active Customers\" FROM heartbeat_readings WHERE $__timeFilter(recorded_at);",
                     "refId": "A"
                 }
             ],
             "fieldConfig": {
                 "defaults": {
                     "color": {
-                        "fixedColor": "blue",
+                        "fixedColor": "dark-blue",
                         "mode": "fixed"
                     },
+                    "noValue": "0",
                     "thresholds": {
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "blue",
+                                "color": "dark-blue",
                                 "value": null
                             }
                         ]
@@ -66,10 +69,17 @@
                 "overrides": []
             },
             "options": {
-                "colorMode": "background",
+                "colorMode": "background_solid",
                 "graphMode": "none",
-                "textMode": "value_and_name",
-                "orientation": "auto"
+                "textMode": "value",
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                }
             }
         },
         {
@@ -77,10 +87,11 @@
                 "type": "postgres",
                 "uid": "heartbeat-postgres"
             },
+            "description": "Total number of heartbeat messages consumed from Kafka and stored in PostgreSQL during the selected time window.",
             "gridPos": {
-                "h": 4,
-                "w": 6,
-                "x": 6,
+                "h": 5,
+                "w": 4,
+                "x": 4,
                 "y": 1
             },
             "id": 2,
@@ -95,21 +106,22 @@
                     "editorMode": "code",
                     "format": "table",
                     "rawQuery": true,
-                    "rawSql": "SELECT COUNT(*) AS \"value\" FROM heartbeat_readings WHERE $__timeFilter(recorded_at);",
+                    "rawSql": "SELECT COUNT(*) AS \"Total Readings\" FROM heartbeat_readings WHERE $__timeFilter(recorded_at);",
                     "refId": "A"
                 }
             ],
             "fieldConfig": {
                 "defaults": {
                     "color": {
-                        "fixedColor": "green",
+                        "fixedColor": "dark-green",
                         "mode": "fixed"
                     },
+                    "noValue": "0",
                     "thresholds": {
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "green",
+                                "color": "dark-green",
                                 "value": null
                             }
                         ]
@@ -118,10 +130,17 @@
                 "overrides": []
             },
             "options": {
-                "colorMode": "background",
+                "colorMode": "background_solid",
                 "graphMode": "area",
-                "textMode": "value_and_name",
-                "orientation": "auto"
+                "textMode": "value",
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                }
             }
         },
         {
@@ -129,10 +148,11 @@
                 "type": "postgres",
                 "uid": "heartbeat-postgres"
             },
+            "description": "Count of readings flagged as anomalous (heart rate outside the 60-100 bpm normal range).",
             "gridPos": {
-                "h": 4,
-                "w": 6,
-                "x": 12,
+                "h": 5,
+                "w": 4,
+                "x": 8,
                 "y": 1
             },
             "id": 3,
@@ -147,21 +167,22 @@
                     "editorMode": "code",
                     "format": "table",
                     "rawQuery": true,
-                    "rawSql": "SELECT SUM(CASE WHEN is_anomaly THEN 1 ELSE 0 END) AS \"value\" FROM heartbeat_readings WHERE $__timeFilter(recorded_at);",
+                    "rawSql": "SELECT SUM(CASE WHEN is_anomaly THEN 1 ELSE 0 END) AS \"Anomalies\" FROM heartbeat_readings WHERE $__timeFilter(recorded_at);",
                     "refId": "A"
                 }
             ],
             "fieldConfig": {
                 "defaults": {
                     "color": {
-                        "fixedColor": "orange",
+                        "fixedColor": "dark-orange",
                         "mode": "fixed"
                     },
+                    "noValue": "0",
                     "thresholds": {
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "orange",
+                                "color": "dark-orange",
                                 "value": null
                             }
                         ]
@@ -170,10 +191,17 @@
                 "overrides": []
             },
             "options": {
-                "colorMode": "background",
+                "colorMode": "background_solid",
                 "graphMode": "area",
-                "textMode": "value_and_name",
-                "orientation": "auto"
+                "textMode": "value",
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                }
             }
         },
         {
@@ -181,10 +209,11 @@
                 "type": "postgres",
                 "uid": "heartbeat-postgres"
             },
+            "description": "Percentage of all readings that were flagged as anomalous. Thresholds: Green < 5%, Yellow 5-10%, Orange 10-20%, Red > 20%.",
             "gridPos": {
-                "h": 4,
-                "w": 6,
-                "x": 18,
+                "h": 5,
+                "w": 4,
+                "x": 12,
                 "y": 1
             },
             "id": 4,
@@ -199,7 +228,7 @@
                     "editorMode": "code",
                     "format": "table",
                     "rawQuery": true,
-                    "rawSql": "SELECT ROUND(100.0 * SUM(CASE WHEN is_anomaly THEN 1 ELSE 0 END) / NULLIF(COUNT(*), 0), 1) AS \"value\" FROM heartbeat_readings WHERE $__timeFilter(recorded_at);",
+                    "rawSql": "SELECT ROUND(100.0 * SUM(CASE WHEN is_anomaly THEN 1 ELSE 0 END) / NULLIF(COUNT(*), 0), 1) AS \"Anomaly Rate\" FROM heartbeat_readings WHERE $__timeFilter(recorded_at);",
                     "refId": "A"
                 }
             ],
@@ -211,6 +240,7 @@
                     "min": 0,
                     "max": 100,
                     "unit": "percent",
+                    "noValue": "0%",
                     "thresholds": {
                         "mode": "absolute",
                         "steps": [
@@ -236,8 +266,150 @@
                 "overrides": []
             },
             "options": {
-                "showThresholdLabels": false,
+                "showThresholdLabels": true,
                 "showThresholdMarkers": true
+            }
+        },
+        {
+            "datasource": {
+                "type": "postgres",
+                "uid": "heartbeat-postgres"
+            },
+            "description": "The most recently recorded heart rate value across all customers. Green = normal (60-100 bpm), Red = anomalous.",
+            "gridPos": {
+                "h": 5,
+                "w": 4,
+                "x": 16,
+                "y": 1
+            },
+            "id": 10,
+            "title": "Latest Heart Rate",
+            "type": "stat",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "postgres",
+                        "uid": "heartbeat-postgres"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT heart_rate AS \"bpm\" FROM heartbeat_readings ORDER BY recorded_at DESC LIMIT 1;",
+                    "refId": "A"
+                }
+            ],
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "unit": "bpm",
+                    "noValue": "--",
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "red",
+                                "value": null
+                            },
+                            {
+                                "color": "green",
+                                "value": 60
+                            },
+                            {
+                                "color": "red",
+                                "value": 100
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "options": {
+                "colorMode": "value",
+                "graphMode": "none",
+                "textMode": "value",
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                }
+            }
+        },
+        {
+            "datasource": {
+                "type": "postgres",
+                "uid": "heartbeat-postgres"
+            },
+            "description": "Average heart rate across all customers and readings in the current time window.",
+            "gridPos": {
+                "h": 5,
+                "w": 4,
+                "x": 20,
+                "y": 1
+            },
+            "id": 11,
+            "title": "Avg Heart Rate",
+            "type": "stat",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "postgres",
+                        "uid": "heartbeat-postgres"
+                    },
+                    "editorMode": "code",
+                    "format": "table",
+                    "rawQuery": true,
+                    "rawSql": "SELECT ROUND(AVG(heart_rate)::numeric, 1) AS \"bpm\" FROM heartbeat_readings WHERE $__timeFilter(recorded_at);",
+                    "refId": "A"
+                }
+            ],
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "unit": "bpm",
+                    "noValue": "--",
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "red",
+                                "value": null
+                            },
+                            {
+                                "color": "green",
+                                "value": 60
+                            },
+                            {
+                                "color": "yellow",
+                                "value": 90
+                            },
+                            {
+                                "color": "red",
+                                "value": 100
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "textMode": "value",
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                }
             }
         },
         {
@@ -246,7 +418,7 @@
                 "h": 1,
                 "w": 24,
                 "x": 0,
-                "y": 5
+                "y": 6
             },
             "id": 101,
             "title": "Heart Rate Analysis",
@@ -257,11 +429,12 @@
                 "type": "postgres",
                 "uid": "heartbeat-postgres"
             },
+            "description": "Individual heart rate readings over time, split by customer ID. The dashed red threshold line at 100 bpm marks the upper boundary of the normal range. Spikes above this line indicate anomalous readings. The legend table shows statistical summaries per customer.",
             "gridPos": {
-                "h": 10,
+                "h": 11,
                 "w": 16,
                 "x": 0,
-                "y": 6
+                "y": 7
             },
             "id": 5,
             "title": "Heart Rate Over Time (per Customer)",
@@ -292,6 +465,9 @@
                         "fillOpacity": 8,
                         "showPoints": "never",
                         "spanNulls": true,
+                        "axisSoftMin": 40,
+                        "axisSoftMax": 160,
+                        "axisLabel": "Heart Rate (bpm)",
                         "thresholdsStyle": {
                             "mode": "dashed"
                         }
@@ -323,7 +499,8 @@
                     "calcs": [
                         "mean",
                         "min",
-                        "max"
+                        "max",
+                        "lastNotNull"
                     ]
                 }
             }
@@ -333,11 +510,12 @@
                 "type": "postgres",
                 "uid": "heartbeat-postgres"
             },
+            "description": "Comparison of average heart rate per customer. Bar color reflects health thresholds: Blue (< 60 bpm, low), Green (60-90 bpm, normal), Yellow (90-110 bpm, elevated), Red (> 110 bpm, critical).",
             "gridPos": {
-                "h": 10,
+                "h": 11,
                 "w": 8,
                 "x": 16,
-                "y": 6
+                "y": 7
             },
             "id": 6,
             "title": "Avg Heart Rate by Customer",
@@ -351,7 +529,7 @@
                     "editorMode": "code",
                     "format": "table",
                     "rawQuery": true,
-                    "rawSql": "SELECT customer_id, ROUND(AVG(heart_rate)::numeric, 1) AS \"heart_rate\" FROM heartbeat_readings WHERE $__timeFilter(recorded_at) GROUP BY customer_id ORDER BY customer_id;",
+                    "rawSql": "SELECT customer_id AS \"Customer\", ROUND(AVG(heart_rate)::numeric, 1) AS \"Avg HR\" FROM heartbeat_readings WHERE $__timeFilter(recorded_at) GROUP BY customer_id ORDER BY customer_id;",
                     "refId": "A"
                 }
             ],
@@ -391,7 +569,8 @@
                 "displayMode": "gradient",
                 "orientation": "horizontal",
                 "showUnfilled": true,
-                "valueMode": "text"
+                "valueMode": "text",
+                "namePlacement": "auto"
             }
         },
         {
@@ -400,7 +579,7 @@
                 "h": 1,
                 "w": 24,
                 "x": 0,
-                "y": 16
+                "y": 18
             },
             "id": 102,
             "title": "Anomaly Intelligence",
@@ -411,11 +590,12 @@
                 "type": "postgres",
                 "uid": "heartbeat-postgres"
             },
+            "description": "Proportion of normal vs anomalous readings. A healthy system should show anomalies at < 5% of total volume.",
             "gridPos": {
-                "h": 8,
+                "h": 9,
                 "w": 5,
                 "x": 0,
-                "y": 17
+                "y": 19
             },
             "id": 7,
             "title": "Reading Distribution",
@@ -485,11 +665,12 @@
                     "displayMode": "list",
                     "placement": "bottom",
                     "values": [
+                        "value",
                         "percent"
                     ]
                 },
                 "tooltip": {
-                    "mode": "single"
+                    "mode": "multi"
                 }
             }
         },
@@ -498,11 +679,12 @@
                 "type": "postgres",
                 "uid": "heartbeat-postgres"
             },
+            "description": "Stacked bar chart showing how anomalies are distributed across customers over time. Helps identify whether anomalies are concentrated on specific customers or spread evenly.",
             "gridPos": {
-                "h": 8,
+                "h": 9,
                 "w": 7,
                 "x": 5,
-                "y": 17
+                "y": 19
             },
             "id": 8,
             "title": "Anomalies per Customer",
@@ -527,18 +709,20 @@
                     },
                     "custom": {
                         "drawStyle": "bars",
-                        "fillOpacity": 60,
+                        "fillOpacity": 70,
                         "lineWidth": 0,
                         "stacking": {
                             "mode": "normal"
-                        }
+                        },
+                        "axisLabel": "Anomaly Count"
                     }
                 },
                 "overrides": []
             },
             "options": {
                 "tooltip": {
-                    "mode": "multi"
+                    "mode": "multi",
+                    "sort": "desc"
                 },
                 "legend": {
                     "displayMode": "list",
@@ -551,11 +735,12 @@
                 "type": "postgres",
                 "uid": "heartbeat-postgres"
             },
+            "description": "The 25 most recent anomalous readings, sorted by time (newest first). Heart rate cells are color-coded: Orange (100-120 bpm) indicates mildly elevated, Red (> 120 bpm) indicates critically high. Low anomalies (< 60 bpm) are also flagged.",
             "gridPos": {
-                "h": 8,
+                "h": 9,
                 "w": 12,
                 "x": 12,
-                "y": 17
+                "y": 19
             },
             "id": 9,
             "title": "Recent Anomaly Details",
@@ -569,7 +754,7 @@
                     "editorMode": "code",
                     "format": "table",
                     "rawQuery": true,
-                    "rawSql": "SELECT customer_id, heart_rate, recorded_at FROM heartbeat_readings WHERE is_anomaly = TRUE AND $__timeFilter(recorded_at) ORDER BY recorded_at DESC LIMIT 20;",
+                    "rawSql": "SELECT customer_id AS \"Customer\", heart_rate AS \"Heart Rate (bpm)\", recorded_at AS \"Recorded At\" FROM heartbeat_readings WHERE is_anomaly = TRUE AND $__timeFilter(recorded_at) ORDER BY recorded_at DESC LIMIT 25;",
                     "refId": "A"
                 }
             ],
@@ -582,12 +767,8 @@
                         "mode": "absolute",
                         "steps": [
                             {
-                                "color": "green",
+                                "color": "text",
                                 "value": null
-                            },
-                            {
-                                "color": "red",
-                                "value": 100
                             }
                         ]
                     },
@@ -595,14 +776,15 @@
                         "align": "auto",
                         "cellOptions": {
                             "type": "auto"
-                        }
+                        },
+                        "filterable": true
                     }
                 },
                 "overrides": [
                     {
                         "matcher": {
                             "id": "byName",
-                            "options": "heart_rate"
+                            "options": "Heart Rate (bpm)"
                         },
                         "properties": [
                             {
@@ -627,6 +809,42 @@
                                         }
                                     ]
                                 }
+                            },
+                            {
+                                "id": "unit",
+                                "value": "bpm"
+                            },
+                            {
+                                "id": "custom.width",
+                                "value": 140
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Recorded At"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "dateTimeAsIso"
+                            },
+                            {
+                                "id": "custom.width",
+                                "value": 220
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Customer"
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.width",
+                                "value": 120
                             }
                         ]
                     }
@@ -636,8 +854,19 @@
                 "showHeader": true,
                 "cellHeight": "sm",
                 "footer": {
-                    "show": false
-                }
+                    "show": true,
+                    "countRows": true,
+                    "reducer": [
+                        "count"
+                    ],
+                    "fields": ""
+                },
+                "sortBy": [
+                    {
+                        "displayName": "Recorded At",
+                        "desc": true
+                    }
+                ]
             }
         }
     ],
@@ -646,7 +875,9 @@
     "tags": [
         "heartbeat",
         "monitoring",
-        "real-time"
+        "real-time",
+        "kafka",
+        "postgresql"
     ],
     "templating": {
         "list": []
@@ -655,9 +886,26 @@
         "from": "now-5m",
         "to": "now"
     },
-    "timepicker": {},
+    "timepicker": {
+        "refresh_intervals": [
+            "5s",
+            "10s",
+            "30s",
+            "1m"
+        ],
+        "time_options": [
+            "1m",
+            "5m",
+            "15m",
+            "30m",
+            "1h",
+            "6h",
+            "12h",
+            "24h"
+        ]
+    },
     "timezone": "browser",
     "title": "Heartbeat Monitoring Overview",
     "uid": "heartbeat-monitor",
-    "version": 3
+    "version": 4
 }
