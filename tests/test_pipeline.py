@@ -10,6 +10,9 @@ Tests individual components of the heartbeat monitoring system:
 
 import sys
 import os
+import logging
+
+logging.basicConfig(level=logging.INFO, format="%(message)s")
 
 # Add src/ to Python path so we can import our modules
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
@@ -24,7 +27,7 @@ def test_customer_id_generation():
     assert len(ids) == 3, f"Expected 3, got {len(ids)}"
     assert ids[0] == "CUST-001", f"Expected CUST-001, got {ids[0]}"
     assert ids[2] == "CUST-003", f"Expected CUST-003, got {ids[2]}"
-    print("[PASS] test_customer_id_generation")
+    logging.info("[PASS] test_customer_id_generation")
 
 
 def test_heartbeat_has_required_fields():
@@ -33,14 +36,14 @@ def test_heartbeat_has_required_fields():
     required = {"customer_id", "timestamp", "heart_rate", "is_anomaly"}
     missing = required - reading.keys()
     assert not missing, f"Missing fields: {missing}"
-    print("[PASS] test_heartbeat_has_required_fields")
+    logging.info("[PASS] test_heartbeat_has_required_fields")
 
 
 def test_heart_rate_is_integer():
     """Test that heart rate is an integer."""
     reading = generate_heartbeat("CUST-001")
     assert isinstance(reading["heart_rate"], int), "heart_rate should be int"
-    print("[PASS] test_heart_rate_is_integer")
+    logging.info("[PASS] test_heart_rate_is_integer")
 
 
 def test_batch_size_matches_customer_count():
@@ -48,7 +51,7 @@ def test_batch_size_matches_customer_count():
     ids = generate_customer_ids(NUM_CUSTOMERS)
     batch = generate_batch(ids)
     assert len(batch) == NUM_CUSTOMERS, f"Expected {NUM_CUSTOMERS}, got {len(batch)}"
-    print("[PASS] test_batch_size_matches_customer_count")
+    logging.info("[PASS] test_batch_size_matches_customer_count")
 
 
 def test_heart_rate_within_bounds():
@@ -57,7 +60,7 @@ def test_heart_rate_within_bounds():
         reading = generate_heartbeat("CUST-001")
         hr = reading["heart_rate"]
         assert 30 <= hr <= 180, f"Heart rate {hr} is outside [30, 180]"
-    print("[PASS] test_heart_rate_within_bounds")
+    logging.info("[PASS] test_heart_rate_within_bounds")
 
 
 def test_db_connection():
@@ -66,9 +69,9 @@ def test_db_connection():
         from db import get_connection
         conn = get_connection()
         conn.close()
-        print("[PASS] test_db_connection")
+        logging.info("[PASS] test_db_connection")
     except Exception as e:
-        print(f"[SKIP] test_db_connection — DB not reachable: {e}")
+        logging.info(f"[SKIP] test_db_connection — DB not reachable: {e}")
 
 
 def test_db_insert_and_query():
@@ -79,15 +82,15 @@ def test_db_insert_and_query():
         insert_reading(reading)
         rows = query_latest_readings(1)
         assert len(rows) >= 1, "Expected at least one row after insert"
-        print("[PASS] test_db_insert_and_query")
+        logging.info("[PASS] test_db_insert_and_query")
     except Exception as e:
-        print(f"[SKIP] test_db_insert_and_query — DB not reachable: {e}")
+        logging.info(f"[SKIP] test_db_insert_and_query — DB not reachable: {e}")
 
 
 if __name__ == "__main__":
-    print("=" * 50)
-    print("  Heartbeat Pipeline — Component Tests")
-    print("=" * 50 + "\n")
+    logging.info("=" * 50)
+    logging.info("  Heartbeat Pipeline — Component Tests")
+    logging.info("=" * 50 + "\n")
 
     # Data generator tests (no external dependencies)
     test_customer_id_generation()
@@ -96,12 +99,12 @@ if __name__ == "__main__":
     test_batch_size_matches_customer_count()
     test_heart_rate_within_bounds()
 
-    print()
+    logging.info("")
 
     # Database tests (require running PostgreSQL)
     test_db_connection()
     test_db_insert_and_query()
 
-    print("\n" + "=" * 50)
-    print("  All available tests completed.")
-    print("=" * 50)
+    logging.info("\n" + "=" * 50)
+    logging.info("  All available tests completed.")
+    logging.info("=" * 50)

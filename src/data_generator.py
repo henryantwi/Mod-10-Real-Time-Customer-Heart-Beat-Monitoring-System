@@ -53,13 +53,15 @@ def generate_batch(customer_ids: list[str]) -> list[dict]:
 
 # ── Quick standalone test ──────────────────────────────────────
 if __name__ == "__main__":
+    import logging
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
     customers = generate_customer_ids(NUM_CUSTOMERS)
-    print(f"Simulating {len(customers)} customers: {customers}\n")
+    logging.info(f"Simulating {len(customers)} customers: {customers}\n")
 
     for _ in range(3):  # Generate 3 batches for demo
         batch = generate_batch(customers)
         for reading in batch:
             flag = " ⚠ ANOMALY" if reading["is_anomaly"] else ""
-            print(f"  {reading['customer_id']}  HR={reading['heart_rate']:>3}{flag}")
-        print()
+            logging.info(f"  {reading['customer_id']}  HR={reading['heart_rate']:>3}{flag}")
+        logging.info("")
         time.sleep(1)
