@@ -27,7 +27,7 @@ flowchart LR
     Grafana -.->|SQL Query| DB
 ```
 
-![Architecture Diagram](architecture_diagram.drawio.png)
+<!-- ![Architecture Diagram](architecture_diagram.drawio.png) -->
 
 ## Prerequisites
 
