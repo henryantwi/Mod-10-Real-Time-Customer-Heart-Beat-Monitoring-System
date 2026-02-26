@@ -76,7 +76,6 @@ You should see messages being consumed, validated, and stored in PostgreSQL.
 uv run pytest tests/ -v
 ```
 
-<!-- 📸 INSERT SCREENSHOT: pytest test results showing all tests passing -->
 ![Pytest results](docs/screenshots/pytest_results.png)
 
 To run with coverage:
@@ -85,7 +84,6 @@ To run with coverage:
 uv run pytest tests/ --cov=src --cov-report=term-missing --cov-fail-under=70
 ```
 
-<!-- 📸 INSERT SCREENSHOT: pytest coverage report showing coverage percentage -->
 ![Coverage report](docs/screenshots/pytest_coverage.png)
 
 ### 6. Lint & Format
@@ -95,7 +93,6 @@ uv run ruff check src/ tests/
 uv run ruff format --check src/ tests/
 ```
 
-<!-- 📸 INSERT SCREENSHOT: ruff check output (all checks passed) -->
 ![Ruff lint results](docs/screenshots/ruff_check.png)
 
 ### 7. Open the Grafana Dashboard
@@ -175,7 +172,6 @@ This project uses **GitHub Actions** for continuous integration. On every push t
 2. **Ruff format** — formatting verification
 3. **Pytest** — full test suite with 70% coverage gate
 
-<!-- 📸 INSERT SCREENSHOT: GitHub Actions CI workflow passing -->
 ![CI Pipeline](docs/screenshots/ci_pipeline.png)
 
 ## Stopping the System
