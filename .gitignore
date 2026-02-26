@@ -33,6 +33,9 @@ postgres_data/
 .coverage
 htmlcov/
 
+# ── Temp / Reference docs ──────────────────────────────────────
+.temp/
+
 # ── Misc ───────────────────────────────────────────────────────
 *.log
 .env
