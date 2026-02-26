@@ -8,17 +8,14 @@ Tests individual components of the heartbeat monitoring system:
   4. (Manual) Kafka producer → consumer → DB end-to-end
 """
 
-import sys
-import os
 import logging
 
-logging.basicConfig(level=logging.INFO, format="%(message)s")
+import pytest
 
-# Add src/ to Python path so we can import our modules
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
-
+from config import NUM_CUSTOMERS
 from data_generator import generate_batch, generate_customer_ids, generate_heartbeat
-from config import NUM_CUSTOMERS, NORMAL_HR_LOW, NORMAL_HR_HIGH
+
+logging.basicConfig(level=logging.INFO, format="%(message)s")
 
 
 def test_customer_id_generation():
@@ -27,7 +24,6 @@ def test_customer_id_generation():
     assert len(ids) == 3, f"Expected 3, got {len(ids)}"
     assert ids[0] == "CUST-001", f"Expected CUST-001, got {ids[0]}"
     assert ids[2] == "CUST-003", f"Expected CUST-003, got {ids[2]}"
-    logging.info("[PASS] test_customer_id_generation")
 
 
 def test_heartbeat_has_required_fields():
@@ -36,14 +32,12 @@ def test_heartbeat_has_required_fields():
     required = {"customer_id", "timestamp", "heart_rate", "is_anomaly"}
     missing = required - reading.keys()
     assert not missing, f"Missing fields: {missing}"
-    logging.info("[PASS] test_heartbeat_has_required_fields")
 
 
 def test_heart_rate_is_integer():
     """Test that heart rate is an integer."""
     reading = generate_heartbeat("CUST-001")
     assert isinstance(reading["heart_rate"], int), "heart_rate should be int"
-    logging.info("[PASS] test_heart_rate_is_integer")
 
 
 def test_batch_size_matches_customer_count():
@@ -51,7 +45,6 @@ def test_batch_size_matches_customer_count():
     ids = generate_customer_ids(NUM_CUSTOMERS)
     batch = generate_batch(ids)
     assert len(batch) == NUM_CUSTOMERS, f"Expected {NUM_CUSTOMERS}, got {len(batch)}"
-    logging.info("[PASS] test_batch_size_matches_customer_count")
 
 
 def test_heart_rate_within_bounds():
@@ -60,51 +53,29 @@ def test_heart_rate_within_bounds():
         reading = generate_heartbeat("CUST-001")
         hr = reading["heart_rate"]
         assert 30 <= hr <= 180, f"Heart rate {hr} is outside [30, 180]"
-    logging.info("[PASS] test_heart_rate_within_bounds")
 
 
+@pytest.mark.integration
 def test_db_connection():
     """Test that we can connect to PostgreSQL."""
     try:
         from db import get_connection
+
         conn = get_connection()
         conn.close()
-        logging.info("[PASS] test_db_connection")
     except Exception as e:
-        logging.info(f"[SKIP] test_db_connection — DB not reachable: {e}")
+        pytest.skip(f"DB not reachable: {e}")
 
 
+@pytest.mark.integration
 def test_db_insert_and_query():
     """Test inserting a reading and querying it back."""
     try:
         from db import insert_reading, query_latest_readings
+
         reading = generate_heartbeat("TEST-001")
         insert_reading(reading)
         rows = query_latest_readings(1)
         assert len(rows) >= 1, "Expected at least one row after insert"
-        logging.info("[PASS] test_db_insert_and_query")
     except Exception as e:
-        logging.info(f"[SKIP] test_db_insert_and_query — DB not reachable: {e}")
-
-
-if __name__ == "__main__":
-    logging.info("=" * 50)
-    logging.info("  Heartbeat Pipeline — Component Tests")
-    logging.info("=" * 50 + "\n")
-
-    # Data generator tests (no external dependencies)
-    test_customer_id_generation()
-    test_heartbeat_has_required_fields()
-    test_heart_rate_is_integer()
-    test_batch_size_matches_customer_count()
-    test_heart_rate_within_bounds()
-
-    logging.info("")
-
-    # Database tests (require running PostgreSQL)
-    test_db_connection()
-    test_db_insert_and_query()
-
-    logging.info("\n" + "=" * 50)
-    logging.info("  All available tests completed.")
-    logging.info("=" * 50)
+        pytest.skip(f"DB not reachable: {e}")

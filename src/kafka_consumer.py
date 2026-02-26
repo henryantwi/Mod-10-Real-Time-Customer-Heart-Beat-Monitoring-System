@@ -7,7 +7,6 @@ Includes basic validation:
 """
 
 import json
-import sys
 import logging
 
 # Configure logging
@@ -17,10 +16,10 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 
-from confluent_kafka import Consumer, KafkaError
+from confluent_kafka import Consumer, KafkaError  # noqa: E402
 
-from config import KAFKA_BOOTSTRAP_SERVERS, KAFKA_TOPIC, NORMAL_HR_HIGH, NORMAL_HR_LOW
-from db import insert_reading
+from config import KAFKA_BOOTSTRAP_SERVERS, KAFKA_TOPIC, NORMAL_HR_HIGH, NORMAL_HR_LOW  # noqa: E402
+from db import insert_reading  # noqa: E402
 
 REQUIRED_FIELDS = {"customer_id", "timestamp", "heart_rate"}
 
@@ -50,12 +49,14 @@ def flag_anomaly(reading: dict) -> dict:
 
 def create_consumer() -> Consumer:
     """Create and return a KafkaConsumer that deserializes JSON messages."""
-    return Consumer({
-        'bootstrap.servers': KAFKA_BOOTSTRAP_SERVERS,
-        'group.id': 'heartbeat-consumer-group',
-        'auto.offset.reset': 'earliest',
-        'enable.auto.commit': True
-    })
+    return Consumer(
+        {
+            "bootstrap.servers": KAFKA_BOOTSTRAP_SERVERS,
+            "group.id": "heartbeat-consumer-group",
+            "auto.offset.reset": "earliest",
+            "enable.auto.commit": True,
+        }
+    )
 
 
 def run_consumer():
@@ -104,7 +105,9 @@ def run_consumer():
                 logging.error(f"Failed to store reading: {e}")
 
     except KeyboardInterrupt:
-        logging.info(f"[Consumer] Stopped. Messages received: {message_count}, Stored: {stored_count}")
+        logging.info(
+            f"[Consumer] Stopped. Messages received: {message_count}, Stored: {stored_count}"
+        )
     finally:
         consumer.close()
 

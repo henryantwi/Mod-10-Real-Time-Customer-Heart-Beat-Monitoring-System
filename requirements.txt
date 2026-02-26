@@ -1,3 +1,9 @@
 confluent-kafka
 pg8000==1.30.5
 faker==22.0.0
+rav
+streamlit
+pytest
+pytest-cov
+ruff
+pre-commit

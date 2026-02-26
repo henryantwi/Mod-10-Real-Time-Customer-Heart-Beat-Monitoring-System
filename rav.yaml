@@ -9,8 +9,12 @@ scripts:
   producer: uv run src/kafka_producer.py
   consumer: uv run src/kafka_consumer.py
 
-  test: uv run tests/test_pipeline.py
+  test: uv run pytest tests/ -v
+  test-cov: uv run pytest tests/ --cov=src --cov-report=term-missing --cov-fail-under=70
   db-test: uv run src/db.py
+  lint: uv run ruff check src/ tests/
+  format: uv run ruff format src/ tests/
+  format-check: uv run ruff format --check src/ tests/
 
   install: uv add -r requirements.txt
   grafana: echo "Open http://localhost:3000/d/heartbeat-monitor in your browser"

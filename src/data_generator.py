@@ -7,7 +7,7 @@ Each reading is a dictionary with customer_id, timestamp, and heart_rate.
 
 import random
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from config import (
     ANOMALY_CHANCE,
@@ -40,7 +40,7 @@ def generate_heartbeat(customer_id: str) -> dict:
 
     return {
         "customer_id": customer_id,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
         "heart_rate": heart_rate,
         "is_anomaly": is_anomaly,
     }
@@ -54,6 +54,7 @@ def generate_batch(customer_ids: list[str]) -> list[dict]:
 # ── Quick standalone test ──────────────────────────────────────
 if __name__ == "__main__":
     import logging
+
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     customers = generate_customer_ids(NUM_CUSTOMERS)
     logging.info(f"Simulating {len(customers)} customers: {customers}\n")

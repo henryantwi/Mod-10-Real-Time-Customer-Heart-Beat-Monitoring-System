@@ -27,6 +27,12 @@ Thumbs.db
 # ── Docker volumes (local data) ────────────────────────────────
 postgres_data/
 
+# ── Testing & Linting ──────────────────────────────────────────
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
 # ── Misc ───────────────────────────────────────────────────────
 *.log
 .env

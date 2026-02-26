@@ -6,9 +6,8 @@ configured Kafka topic at a regular interval.
 """
 
 import json
-import sys
-import time
 import logging
+import time
 
 # Configure logging
 logging.basicConfig(
@@ -17,17 +16,20 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 
-from confluent_kafka import Producer
+from confluent_kafka import Producer  # noqa: E402
 
-from config import KAFKA_BOOTSTRAP_SERVERS, KAFKA_TOPIC, SEND_INTERVAL_SECONDS, NUM_CUSTOMERS
-from data_generator import generate_batch, generate_customer_ids
+from config import (  # noqa: E402
+    KAFKA_BOOTSTRAP_SERVERS,
+    KAFKA_TOPIC,
+    NUM_CUSTOMERS,
+    SEND_INTERVAL_SECONDS,
+)
+from data_generator import generate_batch, generate_customer_ids  # noqa: E402
 
 
 def create_producer() -> Producer:
     """Create and return a KafkaProducer that serializes values as JSON."""
-    return Producer({
-        'bootstrap.servers': KAFKA_BOOTSTRAP_SERVERS
-    })
+    return Producer({"bootstrap.servers": KAFKA_BOOTSTRAP_SERVERS})
 
 
 def run_producer():
@@ -40,7 +42,7 @@ def run_producer():
     logging.info(f"[Producer] Simulating {len(customer_ids)} customers")
 
     message_count = 0
-        
+
     def delivery_report(err, msg):
         if err is not None:
             logging.error(f"Message delivery failed: {err}")
@@ -54,7 +56,6 @@ def run_producer():
                 producer.produce(KAFKA_TOPIC, value=val_bytes, callback=delivery_report)
                 producer.poll(0)
                 message_count += 1
-
 
                 flag = " [ANOMALY]" if reading["is_anomaly"] else ""
                 logging.info(

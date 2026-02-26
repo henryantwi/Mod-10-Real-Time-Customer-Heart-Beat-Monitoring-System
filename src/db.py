@@ -38,8 +38,7 @@ def insert_readings_batch(readings: list[dict]) -> None:
     """
     # pg8000 executemany creates many INSERT statements, but it works
     params_list = [
-        (r["customer_id"], r["heart_rate"], r["timestamp"], r["is_anomaly"])
-        for r in readings
+        (r["customer_id"], r["heart_rate"], r["timestamp"], r["is_anomaly"]) for r in readings
     ]
     with get_connection() as conn:
         cursor = conn.cursor()
@@ -99,6 +98,7 @@ def get_customer_stats() -> list[tuple]:
 # ── Quick standalone test ──────────────────────────────────────
 if __name__ == "__main__":
     import logging
+
     logging.basicConfig(level=logging.INFO)
     logging.info("[DB] Testing connection...")
     try:

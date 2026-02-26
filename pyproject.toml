@@ -8,6 +8,37 @@ dependencies = [
     "confluent-kafka>=2.13.0",
     "faker==22.0.0",
     "pg8000==1.30.5",
+    "pre-commit>=4.5.1",
+    "pytest>=9.0.2",
+    "pytest-cov>=7.0.0",
     "rav>=0.4.3",
+    "ruff>=0.15.2",
     "streamlit>=1.42.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+markers = [
+    "integration: tests requiring external services (Kafka, PostgreSQL, Docker)",
+]
+addopts = "-v --tb=short"
+
+[tool.ruff]
+target-version = "py314"
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP", "B", "SIM"]
+
+[tool.coverage.run]
+source = ["src"]
+
+[tool.coverage.report]
+fail_under = 70
+show_missing = true
+exclude_lines = [
+    "if __name__ == .__main__.",
+    "pragma: no cover",
 ]
