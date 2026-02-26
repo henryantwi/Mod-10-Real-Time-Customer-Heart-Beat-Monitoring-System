@@ -73,11 +73,32 @@ You should see messages being consumed, validated, and stored in PostgreSQL.
 ### 5. Run Tests
 
 ```bash
-cd tests
-python test_pipeline.py
+uv run pytest tests/ -v
 ```
 
-### 6. Open the Grafana Dashboard
+<!-- 📸 INSERT SCREENSHOT: pytest test results showing all tests passing -->
+![Pytest results](docs/screenshots/pytest_results.png)
+
+To run with coverage:
+
+```bash
+uv run pytest tests/ --cov=src --cov-report=term-missing --cov-fail-under=70
+```
+
+<!-- 📸 INSERT SCREENSHOT: pytest coverage report showing coverage percentage -->
+![Coverage report](docs/screenshots/pytest_coverage.png)
+
+### 6. Lint & Format
+
+```bash
+uv run ruff check src/ tests/
+uv run ruff format --check src/ tests/
+```
+
+<!-- 📸 INSERT SCREENSHOT: ruff check output (all checks passed) -->
+![Ruff lint results](docs/screenshots/ruff_check.png)
+
+### 7. Open the Grafana Dashboard
 
 Grafana starts automatically with Docker Compose and is pre-configured with a **Heartbeat Monitor** dashboard.
 
@@ -106,7 +127,17 @@ Grafana starts automatically with Docker Compose and is pre-configured with a **
 │   └── db.py                # PostgreSQL connection & queries
 │
 ├── tests/
-│   └── test_pipeline.py     # Component & integration tests
+│   ├── conftest.py            # Shared pytest fixtures
+│   ├── test_config.py         # Config validation tests
+│   ├── test_data_generator.py # Data generator tests
+│   ├── test_db.py             # Database tests (mocked)
+│   ├── test_kafka_consumer.py # Consumer tests (mocked)
+│   ├── test_kafka_producer.py # Producer tests (mocked)
+│   └── test_pipeline.py       # Component & integration tests
+│
+├── .github/
+│   └── workflows/
+│       └── ci.yml             # GitHub Actions CI pipeline
 │
 ├── docs/
 │   └── screenshots/         # Terminal & DB screenshots
@@ -135,6 +166,17 @@ All settings are centralized in `src/config.py`:
 | `NUM_CUSTOMERS` | `5` | Simulated customer count |
 | `SEND_INTERVAL_SECONDS` | `1` | Delay between batches |
 | `ANOMALY_CHANCE` | `0.05` | Probability of anomaly reading |
+
+## CI/CD
+
+This project uses **GitHub Actions** for continuous integration. On every push to `main` and on pull requests, the pipeline runs:
+
+1. **Ruff lint** — code quality checks
+2. **Ruff format** — formatting verification
+3. **Pytest** — full test suite with 70% coverage gate
+
+<!-- 📸 INSERT SCREENSHOT: GitHub Actions CI workflow passing -->
+![CI Pipeline](docs/screenshots/ci_pipeline.png)
 
 ## Stopping the System
 
