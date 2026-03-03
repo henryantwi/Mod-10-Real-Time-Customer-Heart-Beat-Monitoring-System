@@ -60,7 +60,7 @@ jobs:
       
       - name: Validate docker-compose.yml
         # Checks if the syntax and definitions in docker-compose.yml are valid
-        run: docker-compose config -q
+        run: docker compose config -q
 
   test:
     name: Test (Python ${{ matrix.python-version }})
